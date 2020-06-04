@@ -1,0 +1,89 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <script src="books/static/js/jquery-2.2.4.min.js"></script>
+    <script src="books/static/js/bootstrap.min.js"></script>
+    <script src="http://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+    <script src="http://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+
+    <h3>Book List</h3>
+</head>
+<body>
+
+<div class="container pt-5">
+    <form method="POST" id="post_form">
+        {% csrf_token %}
+        <div class="form_group">
+        <label>Book</label>
+        <input type="text" class="form_control" id="book" placeholder="Book">
+        </div>
+
+        <div class="form_group">
+        <label>Author</label>
+        <input type="text" class="form_control" id="author" placeholder="Author">
+        </div>
+
+        <div class="form_group">
+        <label>Description</label>
+        <textarea class="form_control" id="description" placeholder="Description"></textarea>
+        </div>
+
+        <button type="submit" class="btn btn_primary">Submit</button>
+</form>
+
+<div class="row mb-2 posts">
+    {% for post in posts %}
+    <div class="col-md-6">
+        <div class="row no-gutters border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative">
+            <div class="col p-4 d-flex flex-column position-static">
+                <h3 class="mb-0">{{post.book}}</h3>
+                <h3 class="mb-0">{{post.author}}</h3>
+                <p class="mb-auto">{{post.description}}</p>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+ </div>
+</div>
+</body>
+
+
+<script>
+$(document).on('submit', '#post_form', function(e){
+    $.ajax({
+        type: 'POST',
+        url: '{% url "create" %}',
+        data:{
+            book: $('#book').val(),
+            author: $('#author').val(),
+            description: $('#description').val(),
+            csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val(),
+            action: 'post'
+        },
+        success: function(json){
+            document.getElementById("post_form").reset();
+            $(".posts").prepend('<div class="col-md-6">'+
+                '<div class="row no-gutters border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative">' +
+                    '<div class="col p-4 d-flex flex-column position-static">' +
+                        '<h3 class="mb-0">' + json.book + '</h3>' +
+                        '<h3 class="mb-0">' + json.author + '</h3>' +
+                        '<p class="mb-auto">' + json.description + '</p>' +
+                    '</div>' +
+                '</div>' +
+            '</div>'
+            )
+        },
+        error : function(xhr,errmsg,err) {
+        console.log(xhr.status + ": " + xhr.responseText);
+    }
+    });
+});
+
+</script>
+
+</html>
